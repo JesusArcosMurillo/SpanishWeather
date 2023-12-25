@@ -1,3 +1,27 @@
 <resources>
     <string name="app_name">SpanishWeather</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="action_search">buscar</string>
+    <string-array name="comunidades_autonomas">
+        <item>Andalucía</item>
+        <item>Aragón</item>
+        <item>Asturias</item>
+        <item>Canarias</item>
+        <item>Cantabria</item>
+        <item>Castilla y León</item>
+        <item>Castilla-La Mancha</item>
+        <item>Cataluña</item>
+        <item>Comunidad Valenciana</item>
+        <item>Extremadura</item>
+        <item>Galicia</item>
+        <item>Islas Baleares</item>
+        <item>La Rioja</item>
+        <item>Comunidad de Madrid</item>
+        <item>Región de Murcia</item>
+        <item>Comunidad Foral de Navarra</item>
+        <item>País Vasco</item>
+        <item>Ceuta</item>
+        <item>Melilla</item>
+    </string-array>
 </resources>

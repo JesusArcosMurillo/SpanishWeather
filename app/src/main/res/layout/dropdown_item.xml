@@ -1,0 +1,28 @@
+<!-- res/layout/dropdown_item_with_icon.xml -->
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    android:padding="13dp">
+
+    <ImageView
+        android:id="@+id/image_ccaa"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_marginEnd="8dp"
+        android:src="@drawable/aragon"/> <!-- Ajusta el margen según tus necesidades -->
+         <!-- Coloca el recurso de imagen de la CCAA -->
+
+    <TextView
+        android:id="@+id/tv_ccaa"
+        android:text="Aragón"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/open_sans_bold"
+        android:textSize="16sp" />
+
+</LinearLayout>
+
+

@@ -1,9 +1,9 @@
 package es.unex.giiis.asee.spanishweather.database
 
+import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 import java.io.Serializable
-import androidx.room.Index
-import androidx.room.Entity
 
 @Entity(
     tableName = "usuarios",
