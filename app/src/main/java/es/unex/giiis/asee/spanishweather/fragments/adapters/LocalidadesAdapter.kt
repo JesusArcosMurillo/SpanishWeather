@@ -28,7 +28,8 @@ class LocalidadesAdapter(
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ShowViewHolder {
         try {
-            val binding = LocalidadItemListBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+            val binding =
+                LocalidadItemListBinding.inflate(LayoutInflater.from(parent.context), parent, false)
             val viewHolder = ShowViewHolder(binding, context)
             Log.d("LocalidadesAdapter", "onCreateViewHolder: View created")
             return viewHolder
@@ -38,17 +39,16 @@ class LocalidadesAdapter(
         }
     }
 
-    //infla el layout y crea un ViewHolder, devolviendo como parámetro
-
     override fun onBindViewHolder(holder: ShowViewHolder, position: Int) {
         holder.bind(values[position])
     } //recibe como parámetro un ViewHolder, el cuál se reutilizará para cargar el elemento values[position]
 
     override fun getItemCount(): Int = values.size //devuelve el número de elementos de la lista
 
-    inner class ShowViewHolder( private val binding: LocalidadItemListBinding,
-                                private val context: Context?)
-        : RecyclerView.ViewHolder(binding.root) {
+    inner class ShowViewHolder(
+        private val binding: LocalidadItemListBinding,
+        private val context: Context?
+    ) : RecyclerView.ViewHolder(binding.root) {
         fun bind(pueblo: Localidad) {
             Log.d("LocalidadesAdapter", "funcion bind: layout cargado")
             with(binding) {
@@ -60,22 +60,19 @@ class LocalidadesAdapter(
 
                 tvLocalidad.text = pueblo.location.name //le asignamos el nombre del pueblo
                 tvFecha.text = pueblo.current.last_updated //la fecha
-                tvTemperaturaminima.text = "${pueblo.forecast.forecastday[0].day.totalprecip_in.toString()}mm" //lo que llueve hoy
-                tvTemperaturamaxima.text = "${pueblo.current.temp_c.toString()}º" //la temperatura actual
+                tvTemperaturaminima.text =
+                    "${pueblo.forecast.forecastday[0].day.totalprecip_in.toString()}mm" //lo que llueve hoy
+                tvTemperaturamaxima.text =
+                    "${pueblo.current.temp_c.toString()}º" //la temperatura actual
                 context?.let {
                     Glide.with(context)
                         .load("https:${pueblo.current.condition.icon}")
                         .into(itemImg)
                 }
-
             }
         }
     }
-    fun updateData(values: List<Localidad>) {
-        this.values = values
-        notifyDataSetChanged()
-    }
-        } //vincula los datos del juego con el layout a través del binding
+}
 
 
 

@@ -1,5 +1,9 @@
 package es.unex.giiis.asee.spanishweather.api.models
 
+import androidx.room.Entity
+import java.io.Serializable
+
+@Entity
 data class Astro(
     val is_moon_up: Int,
     val is_sun_up: Int,
@@ -9,4 +13,4 @@ data class Astro(
     val moonset: String,
     val sunrise: String,
     val sunset: String
-)
+) : Serializable

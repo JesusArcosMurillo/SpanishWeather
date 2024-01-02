@@ -1,58 +1,94 @@
 package es.unex.giiis.asee.spanishweather.fragments
 
+import android.content.ContentValues
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import es.unex.giiis.asee.spanishweather.R
+import androidx.recyclerview.widget.LinearLayoutManager
+import es.unex.giiis.asee.spanishweather.api.conexionAPI
+import es.unex.giiis.asee.spanishweather.database.clases.Location
+import es.unex.giiis.asee.spanishweather.database.RepositoryLocalidades
+import es.unex.giiis.asee.spanishweather.database.SpanishWeatherDatabase
+import es.unex.giiis.asee.spanishweather.database.clases.Usuario
 import es.unex.giiis.asee.spanishweather.databinding.FragmentFavouriteBinding
-import es.unex.giiis.asee.spanishweather.databinding.RecyclerVerticalBinding
+import es.unex.giiis.asee.spanishweather.fragments.adapters.FavouriteAdapter
+import es.unex.giiis.asee.spanishweather.utils.UserProvider
 
-
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
 
 class FavouriteFragment : Fragment() {
     private var _binding: FragmentFavouriteBinding? = null
+    private lateinit var adapter: FavouriteAdapter
+    private lateinit var listener: OnLocationClickListener
+    private var pueblos: List<Location> = emptyList()
+    private lateinit var usuario: Usuario
     private val binding get() = _binding!!
-    private var param1: String? = null
-    private var param2: String? = null
+    private lateinit var db: SpanishWeatherDatabase
+    private lateinit var repository : RepositoryLocalidades
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        arguments?.let {
-            param1 = it.getString(ARG_PARAM1)
-            param2 = it.getString(ARG_PARAM2)
-        }
+    interface OnLocationClickListener {
+        fun onLocationClick(pueblo: Location)
     }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Inflate the layout for this fragment
-        _binding = FragmentFavouriteBinding.inflate(inflater, container, false)
-        return binding.root
+        try {
+            // Inflate the layout for this fragment
+            _binding = FragmentFavouriteBinding.inflate(inflater, container, false)
+            return binding.root
+        }
+        catch (e: Exception) {
+            Log.e(ContentValues.TAG, "onCreateView", e);
+            throw e;
+        }
     }
 
-    companion object {
-        /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-         *
-         * @param param1 Parameter 1.
-         * @param param2 Parameter 2.
-         * @return A new instance of fragment DiscoverFragment.
-         */
-        // TODO: Rename and change types and number of parameters
-        @JvmStatic
-        fun newInstance(param1: String, param2: String) =
-            FavouriteFragment().apply {
-                arguments = Bundle().apply {
-                    putString(ARG_PARAM1, param1)
-                    putString(ARG_PARAM2, param2)
-                }
-            }
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        val userProvider = activity as UserProvider
+        usuario = userProvider.getUser()
+        setUpRecyclerView()
+        subscribeUi(adapter)
+        repository.setUserName(usuario.userName)
+    }
+
+    private fun subscribeUi(adapter: FavouriteAdapter) {
+        repository.locationsInFavourite.observe(viewLifecycleOwner)
+        { user -> adapter.updateData(user.pueblos) } //user es el parámetro de la lambda, y recibe valor cuando se produce un cambio
+    }
+
+
+    override fun onAttach(context: android.content.Context) {
+        super.onAttach(context)
+        db = SpanishWeatherDatabase.getInstance(context)!!
+        repository = RepositoryLocalidades.getInstance(db.localidadDao(), conexionAPI())
+        if (context is OnLocationClickListener) {
+            listener = context
+        } else {
+            throw RuntimeException(context.toString() + " debe implementarse OnLocationClickListener")
+        }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
+
+    private fun setUpRecyclerView() {
+        adapter = FavouriteAdapter(values = pueblos, context = this.context, _binding=binding)
+        adapter.setLocationClickListener {
+            listener.onLocationClick(it)
+        }
+        with(binding) {
+            val layoutManager = LinearLayoutManager(context)
+            listaPueblosFavoritos.layoutManager = layoutManager
+            listaPueblosFavoritos.adapter = adapter
+        }
     }
 }
+
+

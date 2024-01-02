@@ -1,6 +1,9 @@
 package es.unex.giiis.asee.spanishweather.api.models
 
+import androidx.room.Entity
 import com.google.gson.annotations.SerializedName
+import java.io.Serializable
+
 
 data class AirQuality(
     val co: Double,
@@ -11,5 +14,4 @@ data class AirQuality(
     val pm10: Double,
     val pm2_5: Double,
     val so2: Double,
-
-)
+) : Serializable

@@ -9,10 +9,27 @@
         android:id="@+id/favouriteFragment"
         android:name="es.unex.giiis.asee.spanishweather.fragments.FavouriteFragment"
         android:label="Localidades favoritas"
-        tools:layout="@layout/fragment_favourite" />
+        tools:layout="@layout/fragment_favourite" >
+        <action
+            android:id="@+id/action_favouriteFragment_to_detailFragment"
+            app:destination="@id/detailFragment" />
+    </fragment>
     <fragment
         android:id="@+id/provinciasFragment"
         android:name="es.unex.giiis.asee.spanishweather.fragments.ProvinciasFragment"
         android:label="Descubrir"
-        tools:layout="@layout/recycler_vertical" />
+        tools:layout="@layout/recycler_vertical" >
+        <action
+            android:id="@+id/action_provinciasFragment_to_detailFragment"
+            app:destination="@id/detailFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/detailFragment"
+        android:name="es.unex.giiis.asee.spanishweather.fragments.DetailFragment"
+        android:label="Detail"
+        tools:layout="@layout/fragment_detail">
+        <argument
+            android:name="localidad"
+            app:argType="es.unex.giiis.asee.spanishweather.api.models.Localidad"/>
+    </fragment>
 </navigation>

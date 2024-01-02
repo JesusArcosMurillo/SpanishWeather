@@ -1,24 +1,27 @@
 package es.unex.giiis.asee.spanishweather.fragments
 
+import android.animation.ObjectAnimator
 import android.content.ContentValues.TAG
 import android.os.Bundle
-import android.text.Editable
 import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ArrayAdapter
+import android.view.animation.LinearInterpolator
+import android.widget.ProgressBar
 import android.widget.Toast
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import es.unex.giiis.asee.spanishweather.R
 import es.unex.giiis.asee.spanishweather.api.conexionAPI
 import es.unex.giiis.asee.spanishweather.api.models.Localidad
-import es.unex.giiis.asee.spanishweather.database.Provincia
+import es.unex.giiis.asee.spanishweather.database.RepositoryLocalidades
+import es.unex.giiis.asee.spanishweather.database.SpanishWeatherDatabase
+import es.unex.giiis.asee.spanishweather.database.clases.Usuario
+import es.unex.giiis.asee.spanishweather.utils.Provincia
 import es.unex.giiis.asee.spanishweather.databinding.RecyclerVerticalBinding
-import es.unex.giiis.asee.spanishweather.datosestadisticos.DummyProvincia
+import es.unex.giiis.asee.spanishweather.datosestadisticos.DummyRegion
 import es.unex.giiis.asee.spanishweather.datosestadisticos.aragon
 import es.unex.giiis.asee.spanishweather.datosestadisticos.cataluna
 import es.unex.giiis.asee.spanishweather.datosestadisticos.extremadura
@@ -26,40 +29,32 @@ import es.unex.giiis.asee.spanishweather.datosestadisticos.galicia
 import es.unex.giiis.asee.spanishweather.fragments.adapters.ProvinciasAdapter
 import es.unex.giiis.asee.spanishweather.utils.CCAAAdapter
 import es.unex.giiis.asee.spanishweather.utils.CCAAOption
+import es.unex.giiis.asee.spanishweather.utils.UserProvider
 import kotlinx.coroutines.launch
 
 
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
-
 class ProvinciasFragment : Fragment() {
     private var _binding: RecyclerVerticalBinding? = null
-    private var provinciasSeleccionadas : List<DummyProvincia> = emptyList()
+    private lateinit var usuario: Usuario
+    private lateinit var region : DummyRegion
     private var _provincias: List<Provincia> = emptyList()
     private lateinit var adapter: ProvinciasAdapter
     private var isTextViewVisible = true // Guarda el estado de visibilidad
-
+    private lateinit var progressBar: ProgressBar
     private val binding get() = _binding!!
-    private var param1: String? = null
-    private var param2: String? = null
+    private lateinit var listener: OnLocalidadClickListener
+    private lateinit var animation: ObjectAnimator
+    private lateinit var db: SpanishWeatherDatabase
+    private lateinit var repository : RepositoryLocalidades
 
-    private lateinit var listener: OnShowClickListener
-    interface OnShowClickListener {
-        fun onShowClick(pueblo: Localidad)
+    interface OnLocalidadClickListener {
+        fun onLocalidadClick(pueblo: Localidad)
     }
 
     override fun onResume() {
         super.onResume()
         seleccionarCCCA()
         }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        arguments?.let {
-            param1 = it.getString(ARG_PARAM1)
-            param2 = it.getString(ARG_PARAM2)
-        }
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -68,6 +63,7 @@ class ProvinciasFragment : Fragment() {
         try {
             // Inflate the layout for this fragment
             _binding = RecyclerVerticalBinding.inflate(inflater, container, false)
+            progressBar = binding.spinner
             _binding!!.textView2.visibility = if (isTextViewVisible) View.VISIBLE else View.GONE
             return binding.root
         }
@@ -79,12 +75,16 @@ class ProvinciasFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        val userProvider = activity as UserProvider
+        usuario = userProvider.getUser()
         setUpRecyclerView()
     } //se ejecuta después de que la vista del fragmento haya sido creada y llama al setUpRecyclerView()
 
     override fun onAttach(context: android.content.Context) {
         super.onAttach(context)
-        if (context is OnShowClickListener) {
+        db = SpanishWeatherDatabase.getInstance(context)!!
+        repository = RepositoryLocalidades.getInstance(db.localidadDao(), conexionAPI())
+        if (context is OnLocalidadClickListener) {
             listener = context
         } else {
             throw RuntimeException(context.toString() + " debe implementarse OnShowClickListener")
@@ -97,6 +97,9 @@ class ProvinciasFragment : Fragment() {
     }
 
     private fun seleccionarCCCA() {
+
+        animation = ObjectAnimator.ofInt(progressBar, "progress", 0, 100)
+        animation.interpolator = LinearInterpolator()
 
         //Creamos la lista de las CCAA con sus respectivas banderas
         val comunidades = listOf(
@@ -134,22 +137,27 @@ class ProvinciasFragment : Fragment() {
             when (selectedCCAA!!.name) {
                 "Extremadura" -> {
                     // Acciones específicas para Extremadura
-                    provinciasSeleccionadas = extremadura
+                    region = extremadura
+                    animation.duration = 4000 // Duración de la animación
                     llamarAPI()
+                    val int = 2
                 }
                 "Galicia" -> {
                     // Acciones específicas para Galicia
-                    provinciasSeleccionadas = galicia
+                    animation.duration = 6500 // Duración de la animación
+                    region = galicia
                     llamarAPI()
                 }
                 "Aragón" -> {
                     // Acciones específicas para Galicia
-                    provinciasSeleccionadas = aragon
+                    region = aragon
+                    animation.duration = 5000 // Duración de la animación
                     llamarAPI()
                 }
                 "Cataluña" -> {
                     // Acciones específicas para Galicia
-                    provinciasSeleccionadas = cataluna
+                    region = cataluna
+                    animation.duration = 6000 // Duración de la animación
                     llamarAPI()
                 }
             }
@@ -163,62 +171,28 @@ class ProvinciasFragment : Fragment() {
     }
 
     private fun llamarAPI(){
-        binding.spinner.visibility = View.VISIBLE
+        progressBar.visibility = View.VISIBLE
         binding.tvCargando.visibility = View.VISIBLE
+        animation.start()
+
         lifecycleScope.launch {
             try {
-                _provincias = fetchShows().filterNotNull()
+                _provincias = repository.fetchShows(region) //LLAMADA AL REPOSITORIO
                 adapter.updateData(_provincias)
             } catch (error: Throwable) {
                 Toast.makeText(context, error.message, Toast.LENGTH_SHORT).show()
             }finally{
-                binding.spinner.visibility = View.GONE
+                progressBar.visibility = View.GONE
                 binding.tvCargando.visibility = View.GONE
             }
         }
     }
 
-    private suspend fun fetchShows(): List<Provincia> {
-        var conjuntoDeProvincias = mutableListOf<Provincia>() //almacena un conjunto de provincias con los pronosticos
 
-        // Habrá dos for: uno que itere sobre cada una de las provincias de una CCAA
-        // y otro que itere sobre las 10 localidades más importantes de cada provincia
-
-        for (provincia in provinciasSeleccionadas) {
-            var listaProvincia = mutableListOf<Localidad>() //almacena los pronosticos de los pueblos de una provincia
-            for (pueblo in provincia.listaPueblos){
-                try {
-                    val pronosticoPueblo = conexionAPI().getPronostico(
-                        "5083e7829a8b426b868181535231812",pueblo, "yes", 3
-                    )
-                    // con la sentencia anterior cogemos el pronóstico de un solo pueblo
-                    // hay que almacenar en una lista todos los pronósticos de todos los pueblos de una provincia
-
-                    listaProvincia.add(pronosticoPueblo)
-
-                } catch (cause: Throwable) {
-                    throw Throwable("Unable to fetch data from API", cause)
-                }
-            }
-            //una vez hemos cogido todos los pronósticos de todos los pueblos de una provincia, los almacenaremos
-            //en una lista para finalmente tener una lista de provincias con sus respectivos pronósticos
-            //esto se ejecutará cada vez que se recuperen los pronósticos de una provincia completa,
-            //tantas veces como provincias haya en una  CCAA
-
-            var prov = Provincia(
-                nombreProvincia = provincia.nombreProvincia,
-                listaLocalidades = listaProvincia
-            )
-
-            conjuntoDeProvincias.add(prov) //añadimos al conjunto de provincias, la provincia con todos los pronosticos
-        }
-       // adapter.notifyDataSetChanged()
-        return conjuntoDeProvincias
-    }
     private fun setUpRecyclerView() {
         adapter = ProvinciasAdapter(values = _provincias, context = this.context)
         adapter.setLocalidadClickListener {
-            listener.onShowClick(it)
+            listener.onLocalidadClick(it)
         }
 
         with(binding) {

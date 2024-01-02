@@ -6,7 +6,7 @@ import androidx.recyclerview.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import es.unex.giiis.asee.spanishweather.api.models.Localidad
-import es.unex.giiis.asee.spanishweather.database.Provincia
+import es.unex.giiis.asee.spanishweather.utils.Provincia
 import es.unex.giiis.asee.spanishweather.databinding.RecyclerHorizontalBinding
 
 
@@ -52,7 +52,6 @@ class ProvinciasAdapter(
                         click(it)
                     }
                 }
-                localidadesAdapter.updateData(lista.listaLocalidades)
                 rvListaPueblos.adapter= localidadesAdapter
 
             }

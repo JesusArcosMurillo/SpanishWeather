@@ -2,6 +2,7 @@ plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("com.google.devtools.ksp")
+    id("androidx.navigation.safeargs.kotlin")
 }
 
 android {
@@ -51,6 +52,7 @@ android {
 
 dependencies {
 
+    implementation("androidx.gridlayout:gridlayout:1.0.0")
     val nav_version = "2.5.3"
     // Kotlin
     implementation("androidx.navigation:navigation-fragment-ktx:$nav_version")

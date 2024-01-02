@@ -4,12 +4,11 @@ import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat.startActivity
 import androidx.lifecycle.lifecycleScope
-import es.unex.giiis.asee.spanishweather.activities.HomeActivity
-import es.unex.giiis.asee.spanishweather.database.CredentialCheck
+import es.unex.giiis.asee.spanishweather.database.RepositoryUsers
+import es.unex.giiis.asee.spanishweather.utils.CredentialCheck
 import es.unex.giiis.asee.spanishweather.database.SpanishWeatherDatabase
-import es.unex.giiis.asee.spanishweather.database.Usuario
+import es.unex.giiis.asee.spanishweather.database.clases.Usuario
 import es.unex.giiis.asee.spanishweather.databinding.ActivityRegisterBinding
 import kotlinx.coroutines.launch
 
@@ -17,10 +16,12 @@ class RegisterActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityRegisterBinding
     private lateinit var db: SpanishWeatherDatabase
+    private lateinit var repository : RepositoryUsers
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityRegisterBinding.inflate(layoutInflater)
         db = SpanishWeatherDatabase.getInstance(applicationContext)!!
+        repository = RepositoryUsers.getInstance(db.userDao())
         setContentView(binding.root)
         setUpListeners()
     }
@@ -40,12 +41,11 @@ class RegisterActivity : AppCompatActivity() {
             val contrasena= etContrasena.text.toString()
             val usuario=etUsuario.text.toString()
             val email=etEmail.text.toString()
-            val user = Usuario (null, nombre, apellido, contrasena,
-                usuario, email)
+            val user = Usuario (usuario, nombre, apellido, contrasena,
+                email)
 
             val check = CredentialCheck.join(nombre, apellido,
-                contrasena, etContrasenaX2.text.toString(),
-                usuario,email)
+                contrasena, etContrasenaX2.text.toString(),usuario,email)
 
             if (check.fail)
                 notifyInvalidCredentials(check.msg)
@@ -56,17 +56,15 @@ class RegisterActivity : AppCompatActivity() {
 
     private fun registrarUsuario (usuario: Usuario){
         with(binding) {
-                lifecycleScope.launch{
-                    val id = db?.userDao()?.insertarUsuarioConControlDuplicados(usuario)
-                    navegarMainActivity(usuario)
-                }
+            lifecycleScope.launch{
+                val error = repository.insertarUsuario(usuario)
+                navegarMainActivity(usuario)
+            }
         }
     }
 
      fun navegarMainActivity(usuario: Usuario) {
-        val intent = Intent(this, HomeActivity::class.java)
-        intent.putExtra("USUARIO", usuario)
-        startActivity(intent)
+         HomeActivity.start(this, usuario)
 
     }
 

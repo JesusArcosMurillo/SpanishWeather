@@ -1,5 +1,9 @@
 package es.unex.giiis.asee.spanishweather.api.models
 
+import androidx.room.Entity
+import java.io.Serializable
+
+@Entity
 data class Current(
     val air_quality: AirQuality,
     val cloud: Int,
@@ -25,4 +29,4 @@ data class Current(
     val wind_dir: String,
     val wind_kph: Double,
     val wind_mph: Double
-)
+) : Serializable

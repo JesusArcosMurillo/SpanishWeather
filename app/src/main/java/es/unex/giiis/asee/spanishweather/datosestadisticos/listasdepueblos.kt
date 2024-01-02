@@ -75,8 +75,8 @@ package es.unex.giiis.asee.spanishweather.datosestadisticos
 
 
 
-    val extremadura = listOf(provinciaBadajoz, provinciaCaceres)
-    val galicia = listOf(provinciaLugo, provinciaOrense, provinciaPontevedra, provinciaCoruna)
-    val cataluna = listOf(provinciaBarcelona,provinciaGirona,provinciaLerida)
-    val aragon = listOf(provinciaZaragoza,provinciaHuesca,provinciaTeruel)
+    val extremadura = DummyRegion("Extremadura",listOf(provinciaBadajoz, provinciaCaceres))
+    val galicia = DummyRegion("Galicia", listOf(provinciaLugo, provinciaOrense, provinciaPontevedra, provinciaCoruna))
+    val cataluna = DummyRegion("Catalonia", listOf(provinciaBarcelona,provinciaGirona,provinciaLerida))
+    val aragon = DummyRegion("Aragon", listOf(provinciaZaragoza,provinciaHuesca,provinciaTeruel))
 

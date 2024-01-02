@@ -1,4 +1,4 @@
-package es.unex.giiis.asee.spanishweather.database
+package es.unex.giiis.asee.spanishweather.utils
 
 import java.util.regex.Pattern
 

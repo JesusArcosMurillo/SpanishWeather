@@ -1,7 +1,10 @@
 package es.unex.giiis.asee.spanishweather.api.models
 
+import androidx.room.Entity
+import java.io.Serializable
+
+@Entity
 data class Hour(
-    val air_quality: AirQuality,
     val chance_of_rain: Int,
     val chance_of_snow: Int,
     val cloud: Int,
@@ -36,4 +39,4 @@ data class Hour(
     val wind_mph: Double,
     val windchill_c: Double,
     val windchill_f: Double
-)
+) : Serializable

@@ -12,7 +12,7 @@
         <item name="android:textColorSecondary">
             @android:color/white</item>
         <item name="android:fontFamily">
-            @font/open_sans_bold
+            @font/bebas_neue
         </item>
         <item
             name="android:background">@color/tono

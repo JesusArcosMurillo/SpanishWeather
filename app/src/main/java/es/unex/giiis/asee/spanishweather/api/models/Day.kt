@@ -1,7 +1,10 @@
 package es.unex.giiis.asee.spanishweather.api.models
 
+import androidx.room.Entity
+import java.io.Serializable
+
+@Entity
 data class Day(
-    val air_quality: AirQuality,
     val avghumidity: Double,
     val avgtemp_c: Double,
     val avgtemp_f: Double,
@@ -22,4 +25,4 @@ data class Day(
     val totalprecip_mm: Double,
     val totalsnow_cm: Double,
     val uv: Double
-)
+) : Serializable
