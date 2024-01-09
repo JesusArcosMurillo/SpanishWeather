@@ -8,6 +8,7 @@
 
 
     <application
+        android:name="es.unex.giiis.asee.spanishweather.SpanishWeatherApplication"
         android:usesCleartextTraffic="true"
         android:requestLegacyExternalStorage="true"
         android:allowBackup="true"
@@ -32,7 +33,6 @@
             android:theme="@style/Theme.SpanishWeather">>
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>

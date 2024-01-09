@@ -11,14 +11,13 @@ import android.view.ViewGroup
 import android.view.animation.LinearInterpolator
 import android.widget.ProgressBar
 import android.widget.Toast
+import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import es.unex.giiis.asee.spanishweather.R
-import es.unex.giiis.asee.spanishweather.api.conexionAPI
+import es.unex.giiis.asee.spanishweather.activities.HomeViewModel
 import es.unex.giiis.asee.spanishweather.api.models.Localidad
-import es.unex.giiis.asee.spanishweather.database.RepositoryLocalidades
-import es.unex.giiis.asee.spanishweather.database.SpanishWeatherDatabase
-import es.unex.giiis.asee.spanishweather.database.clases.Usuario
 import es.unex.giiis.asee.spanishweather.utils.Provincia
 import es.unex.giiis.asee.spanishweather.databinding.RecyclerVerticalBinding
 import es.unex.giiis.asee.spanishweather.datosestadisticos.DummyRegion
@@ -34,22 +33,16 @@ import kotlinx.coroutines.launch
 
 
 class ProvinciasFragment : Fragment() {
+    private val viewModel: ProvinciasViewModel by viewModels { ProvinciasViewModel.Factory }
+    private val homeViewModel: HomeViewModel by activityViewModels()
     private var _binding: RecyclerVerticalBinding? = null
-    private lateinit var usuario: Usuario
-    private lateinit var region : DummyRegion
+    private var region : DummyRegion? = null
     private var _provincias: List<Provincia> = emptyList()
     private lateinit var adapter: ProvinciasAdapter
     private var isTextViewVisible = true // Guarda el estado de visibilidad
     private lateinit var progressBar: ProgressBar
     private val binding get() = _binding!!
-    private lateinit var listener: OnLocalidadClickListener
     private lateinit var animation: ObjectAnimator
-    private lateinit var db: SpanishWeatherDatabase
-    private lateinit var repository : RepositoryLocalidades
-
-    interface OnLocalidadClickListener {
-        fun onLocalidadClick(pueblo: Localidad)
-    }
 
     override fun onResume() {
         super.onResume()
@@ -73,22 +66,95 @@ class ProvinciasFragment : Fragment() {
         }
     }
 
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val userProvider = activity as UserProvider
-        usuario = userProvider.getUser()
         setUpRecyclerView()
+
+        homeViewModel.user.observe(viewLifecycleOwner) { user ->
+            viewModel.user = user
+        }
+
+        homeViewModel.localidad.observe(viewLifecycleOwner) { localidad ->
+            if (localidad != null) {
+                viewLifecycleOwner.lifecycleScope.launch {
+                    val localidadBuscada = viewModel.buscar(localidad)
+                    if (localidadBuscada != null) {
+                        var conjuntoDeProvincias = mutableListOf<Provincia>()
+                        var conjuntoDePueblos = mutableListOf<Localidad>()
+                        conjuntoDePueblos.add(localidadBuscada)
+                        conjuntoDeProvincias.add(
+                            Provincia(
+                                nombreProvincia = localidadBuscada.location.region, null,
+                                listaLocalidades = conjuntoDePueblos
+                            )
+                        )
+                        var _provincias: List<Provincia> = emptyList()
+                        adapter.updateData(conjuntoDeProvincias)
+                    }
+                }
+            }
+        }
+
+        viewModel.spinner.observe(viewLifecycleOwner) { show ->
+            binding.spinner.visibility = if (show) View.VISIBLE else View.GONE
+        }
+
+        viewModel.toast.observe(viewLifecycleOwner) { text ->
+            text?.let {
+                Toast.makeText(context, text, Toast.LENGTH_SHORT).show()
+                viewModel.onToastShown()
+            }
+        }
+
+        subscribeUi(adapter)
+
+        // El subscribeUi se ejecuta antes de haber seleccionado la CCAA, por lo que,
+        // estará esperando al LiveData para actualizar la pantalla cuando se seleccione una CCAA.
+        // El intentar actualizar de la API se realiza cada vez que selecciono una CCAA de la lista
+        // desplegable, pero, imaginemos que hemos seleccionado una CCAA, se carga de la API,
+        // vamos a otro fragmento, volvemos al original y nos muestra información desactualizada
+        // (se ha superado el tiempo de la cache). En ese caso, sólo podríamos volver a mostrar información
+        // si seleccionamos de nuevo esa CCAA en el desplegable. Pero no queremos eso, queremos que se haga automáticamente.
+
+        if (region != null) { //si ya se ha seleccionado una region
+            viewModel.setRegion(region!!.nombreRegion)
+            viewModel.refresh(region!!)
+        }
+    }
+
+
+    private fun subscribeUi(adapter: ProvinciasAdapter) {
+        viewModel.localidades.observe(viewLifecycleOwner) { localidades ->
+            /**
+             * Me dan una lista de localidades filtradas por la region
+             * En el recycler view mostraré todas las localidades de una región
+             * No obstante, no lo mostraré como una lista vertical de localidades,
+             * sino, que, estará organizado por provincias. Imaginemos que yo filtro
+             * por las localidades de Extremadura: tengo que mostrar dos RecyclerView
+             * horizontales, uno para Cáceres y otro para Badajoz.
+             * Para hacer esto, llamaré al método generarListas(), el cuál me devolverá
+             * una lista de provincias con sus respectivas localidades
+             */
+
+
+            val provincias = generarListas(localidades)
+            adapter.updateData(provincias)
+        }
     } //se ejecuta después de que la vista del fragmento haya sido creada y llama al setUpRecyclerView()
 
-    override fun onAttach(context: android.content.Context) {
-        super.onAttach(context)
-        db = SpanishWeatherDatabase.getInstance(context)!!
-        repository = RepositoryLocalidades.getInstance(db.localidadDao(), conexionAPI())
-        if (context is OnLocalidadClickListener) {
-            listener = context
-        } else {
-            throw RuntimeException(context.toString() + " debe implementarse OnShowClickListener")
+    private fun generarListas(pueblosRegion : List<Localidad>) : List<Provincia> {
+        var conjuntoDeProvincias = mutableListOf<Provincia>() //almacena un conjunto de provincias con los pronosticos
+
+        for (provincia in region!!.listaProvincias){
+            var prov = Provincia(
+                nombreProvincia = provincia.nombreProvincia,
+                region = region!!.nombreRegion,
+                listaLocalidades = pueblosRegion.filter { it.provincia == provincia.nombreProvincia }.toMutableList()
+             )
+            conjuntoDeProvincias.add(prov) //añadimos al conjunto de provincias, la provincia con todos los pronosticos
         }
+        return conjuntoDeProvincias
     }
 
     override fun onDestroyView() {
@@ -103,25 +169,10 @@ class ProvinciasFragment : Fragment() {
 
         //Creamos la lista de las CCAA con sus respectivas banderas
         val comunidades = listOf(
-            CCAAOption("Andalucía", R.drawable.andalucia),
             CCAAOption("Aragón", R.drawable.aragon),
-            CCAAOption("Principado de Asturias", R.drawable.asturias),
-            CCAAOption("Canarias", R.drawable.canarias),
-            CCAAOption("Cantabria", R.drawable.cantabria),
-            CCAAOption("Castilla y León", R.drawable.castillayleon),
-            CCAAOption("Castilla-La Mancha", R.drawable.castillalamancha),
             CCAAOption("Cataluña", R.drawable.cataluna),
-            CCAAOption("Comunidad Foral de Navarra", R.drawable.navarra),
-            CCAAOption("Comunidad de Madrid", R.drawable.madrid),
-            CCAAOption("Comunidad Valenciana", R.drawable.valencia),
             CCAAOption("Extremadura", R.drawable.extremadura),
             CCAAOption("Galicia", R.drawable.galicia),
-            CCAAOption("Islas Baleares", R.drawable.baleares),
-            CCAAOption("La Rioja", R.drawable.larioja),
-            CCAAOption("País Vasco", R.drawable.paisvasco),
-            CCAAOption("Región de Murcia", R.drawable.murcia),
-            CCAAOption("Ceuta", R.drawable.ceuta),
-            CCAAOption("Melilla", R.drawable.melilla)
         )
         val adapter = CCAAAdapter(requireContext(), comunidades)
         binding.autoCompleteTextView.setAdapter(adapter)
@@ -139,26 +190,36 @@ class ProvinciasFragment : Fragment() {
                     // Acciones específicas para Extremadura
                     region = extremadura
                     animation.duration = 4000 // Duración de la animación
-                    llamarAPI()
-                    val int = 2
+                    viewModel.setRegion("Extremadura") //al poner la region, obtendremos a través del LiveData en
+                                                        //subscribeUi las localidades por region
+                    viewModel.refresh(region!!)
+
                 }
                 "Galicia" -> {
                     // Acciones específicas para Galicia
                     animation.duration = 6500 // Duración de la animación
                     region = galicia
-                    llamarAPI()
+                    viewModel.setRegion("Galicia") //al poner la region, obtendremos a través del LiveData en
+                                                    //subscribeUi las localidades por region
+                    viewModel.refresh(region!!)
+
                 }
                 "Aragón" -> {
                     // Acciones específicas para Galicia
                     region = aragon
                     animation.duration = 5000 // Duración de la animación
-                    llamarAPI()
+                    viewModel.setRegion("Aragon")  //al poner la region, obtendremos a través del LiveData en
+                                                    //subscribeUi las localidades por region
+                    viewModel.refresh(region!!)
+
                 }
                 "Cataluña" -> {
                     // Acciones específicas para Galicia
                     region = cataluna
                     animation.duration = 6000 // Duración de la animación
-                    llamarAPI()
+                    viewModel.setRegion("Catalonia")
+                    viewModel.refresh(region!!)
+
                 }
             }
         }
@@ -170,29 +231,11 @@ class ProvinciasFragment : Fragment() {
         adapter.clearData() //se ejecuta cada vez seleccionamos una CCAA nueva. Limpia el recyclerView.
     }
 
-    private fun llamarAPI(){
-        progressBar.visibility = View.VISIBLE
-        binding.tvCargando.visibility = View.VISIBLE
-        animation.start()
-
-        lifecycleScope.launch {
-            try {
-                _provincias = repository.fetchShows(region) //LLAMADA AL REPOSITORIO
-                adapter.updateData(_provincias)
-            } catch (error: Throwable) {
-                Toast.makeText(context, error.message, Toast.LENGTH_SHORT).show()
-            }finally{
-                progressBar.visibility = View.GONE
-                binding.tvCargando.visibility = View.GONE
-            }
-        }
-    }
-
 
     private fun setUpRecyclerView() {
         adapter = ProvinciasAdapter(values = _provincias, context = this.context)
         adapter.setLocalidadClickListener {
-            listener.onLocalidadClick(it)
+            homeViewModel.onLocalidadClick(it)
         }
 
         with(binding) {

@@ -4,13 +4,13 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
-import es.unex.giiis.asee.spanishweather.database.clases.Location
+import es.unex.giiis.asee.spanishweather.api.models.Localidad
 import es.unex.giiis.asee.spanishweather.database.clases.Usuario
 import es.unex.giiis.asee.spanishweather.database.dao.LocalidadDao
 import es.unex.giiis.asee.spanishweather.database.dao.UserDAO
 import es.unex.giiis.asee.spanishweather.database.utils.UserLocalidadCrossRef
 
-@Database(entities = [Usuario::class, Location::class,
+@Database(entities = [Usuario::class, Localidad::class,
                      UserLocalidadCrossRef::class],
     version = 1, exportSchema = false)
 abstract class SpanishWeatherDatabase : RoomDatabase() {

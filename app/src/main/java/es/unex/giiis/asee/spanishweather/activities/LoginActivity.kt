@@ -3,7 +3,10 @@ package es.unex.giiis.asee.spanishweather.activities
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.viewModels
+import es.unex.giiis.asee.spanishweather.SpanishWeatherApplication
 import es.unex.giiis.asee.spanishweather.api.conexionAPI
 import es.unex.giiis.asee.spanishweather.database.RepositoryLocalidades
 import es.unex.giiis.asee.spanishweather.database.RepositoryUsers
@@ -11,17 +14,17 @@ import es.unex.giiis.asee.spanishweather.utils.CredentialCheck
 import es.unex.giiis.asee.spanishweather.database.SpanishWeatherDatabase
 import es.unex.giiis.asee.spanishweather.database.clases.Usuario
 import es.unex.giiis.asee.spanishweather.databinding.ActivityLoginBinding
+import es.unex.giiis.asee.spanishweather.fragments.DetailViewModel
 
 class LoginActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityLoginBinding
-    private lateinit var repository : RepositoryUsers
-    private lateinit var db: SpanishWeatherDatabase
+    private val viewModel: LoginViewModel by viewModels { LoginViewModel.Factory }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val appContainer = (this.application as SpanishWeatherApplication).appContainer //todas las activities tienen una referencia a la app
+
         binding = ActivityLoginBinding.inflate(layoutInflater)
-        db = SpanishWeatherDatabase.getInstance(applicationContext)!!
-        repository = RepositoryUsers.getInstance(db.userDao())
         setContentView(binding.root)
         setUpListeners()
     }
@@ -52,12 +55,12 @@ class LoginActivity : AppCompatActivity() {
             else { //si las credenciales están bien, comprobamos que exista el usuario en la bd
                 val usuario = Usuario(contraseña = etContrasena.text.toString(), userName = etUsuario.text.toString())
                 subscribeUi()
-                repository.setUserName(etUsuario.text.toString())
+                viewModel.user = usuario
             }
         }
     }
     private fun subscribeUi() {
-        repository.userSaved.observe(this)
+        viewModel.userSaved.observe(this)
         { user -> if (user != null) { //si se encuentra, comprobaremos que la contraseña es correcta
                 val contrasenasIguales = CredentialCheck.contrasenasIguales(binding.etContrasena.text.toString(), user.contraseña)
             if (contrasenasIguales) {

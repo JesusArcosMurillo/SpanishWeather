@@ -1,8 +1,8 @@
 package es.unex.giiis.asee.spanishweather.datosestadisticos
 
     val provinciaBadajoz = DummyProvincia("Provincia de Badajoz",listOf("Badajoz",
-        "Merida", "Don Benito", "Villanueva de la Serena",
-        "Almendralejo", "Zafra", "Montijo", "Villafranca de los Barros",
+        "Merida Extremadura", "Don Benito", "Villanueva de la Serena",
+        "Almendralejo", "Zafra", "Montijo Extremadura", "Villafranca de los Barros",
         "Campanario", "Llerena"))
 
     val provinciaCaceres = DummyProvincia("Provincia de Caceres",listOf("Caceres",
@@ -29,9 +29,9 @@ package es.unex.giiis.asee.spanishweather.datosestadisticos
         "Cangas de Morrazo", "Marin Galicia", "Puenteareas", "Porrino",
         "Lalin", "La Estrada"))
 
-    val provinciaCoruna = DummyProvincia("Provincia de Coruña",listOf("Coruña",
+    val provinciaCoruna = DummyProvincia("Provincia de Coruña",listOf("A Coruna",
         "Santiago de Compostela", "Ferrol", "Narón",
-        "Oleiros", "Arteijo", "Ames", "Carballo",
+        "Oleiros", "Arteijo", "Ames Galicia", "Carballo",
         "Culleredo", "Riveira"))
 
 // **************************************************************************************************************
@@ -62,7 +62,7 @@ package es.unex.giiis.asee.spanishweather.datosestadisticos
 
     val provinciaGirona = DummyProvincia("Provincia de Girona", listOf(
     "Girona", "Figueras", "Blanes", "Lloret de Mar", "Olot",
-    "Salt", "Palafrugell", "Sant Feliu de Guíxols", "Bañolas", "Rosas España"))
+    "Salt", "Palafrugell", "Sant Feliu de Guíxols", "Bañolas", "Rosas Catalonia"))
 
     val provinciaLerida = DummyProvincia("Provincia de Lérida", listOf(
     "Lérida", "Tarrega", "Balaguer", "Mollerusa", "Seo de Urgel",

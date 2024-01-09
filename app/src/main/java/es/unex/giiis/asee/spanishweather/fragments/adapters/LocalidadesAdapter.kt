@@ -6,10 +6,8 @@ import android.view.ViewGroup
 import android.content.Context
 import android.util.Log
 import com.bumptech.glide.Glide
-import com.bumptech.glide.request.RequestOptions
 import es.unex.giiis.asee.spanishweather.api.models.Localidad
 import es.unex.giiis.asee.spanishweather.databinding.LocalidadItemListBinding
-import org.json.JSONObject.NULL
 
 
 /* ------------------------------------------------------------------------------------------- */
@@ -61,18 +59,45 @@ class LocalidadesAdapter(
                 tvLocalidad.text = pueblo.location.name //le asignamos el nombre del pueblo
                 tvFecha.text = pueblo.current.last_updated //la fecha
                 tvTemperaturaminima.text =
-                    "${pueblo.forecast.forecastday[0].day.totalprecip_in.toString()}mm" //lo que llueve hoy
+                    "${pueblo.current.precip_mm.toString()}mm" //lo que llueve hoy
                 tvTemperaturamaxima.text =
                     "${pueblo.current.temp_c.toString()}º" //la temperatura actual
-                context?.let {
-                    Glide.with(context)
-                        .load("https:${pueblo.current.condition.icon}")
-                        .into(itemImg)
+
+                if (pueblo.current.is_day == 0) { //si es de noche, cargaremos imágenes nocturnas
+                    if (pueblo.current.cloud >= 25) {
+                        context?.let {
+                            Glide.with(context)
+                                .load("http://cdn.weatherapi.com/weather/64x64/night/116.png")
+                                .into(itemImg)
+                        }
+                    } else {
+                        context?.let {
+                            Glide.with(context)
+                                .load("https://cdn.weatherapi.com/weather/64x64/night/113.png")
+                                .into(itemImg)
+                        }
+                    }
+                } else { //si es de día, cargaremos imagenes diurnas
+                    if (pueblo.current.cloud >= 25) {
+                        context?.let {
+                            Glide.with(context)
+                                .load("https://cdn.weatherapi.com/weather/64x64/day/116.png")
+                                .into(itemImg)
+                        }
+                    } else {
+                        context?.let {
+                            Glide.with(context)
+                                .load("https://cdn.weatherapi.com/weather/64x64/day/113.png")
+                                .into(itemImg)
+                        }
+                    }
                 }
             }
         }
     }
 }
+
+
 
 
 

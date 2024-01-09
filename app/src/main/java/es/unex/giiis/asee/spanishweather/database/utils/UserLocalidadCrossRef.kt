@@ -2,18 +2,18 @@ package es.unex.giiis.asee.spanishweather.database.utils
 
 import androidx.room.Entity
 import androidx.room.ForeignKey
-import es.unex.giiis.asee.spanishweather.database.clases.Location
+import es.unex.giiis.asee.spanishweather.api.models.Localidad
 
 @Entity(
-    primaryKeys = ["userName", "name"],
+    primaryKeys = ["userName", "localidadName"],
     foreignKeys = [
         ForeignKey(
-            entity = Location::class,
-            parentColumns = ["name"],
-            childColumns = ["name"],
+            entity = Localidad::class,
+            parentColumns = ["localidadName"],
+            childColumns = ["localidadName"],
             onDelete = ForeignKey.CASCADE ) ] )
 data class UserLocalidadCrossRef(
     val userName: String,
-    val name: String
+    val localidadName: String
 )
 

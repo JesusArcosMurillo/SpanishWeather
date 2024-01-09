@@ -3,8 +3,10 @@ package es.unex.giiis.asee.spanishweather.activities
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
+import es.unex.giiis.asee.spanishweather.SpanishWeatherApplication
 import es.unex.giiis.asee.spanishweather.database.RepositoryUsers
 import es.unex.giiis.asee.spanishweather.utils.CredentialCheck
 import es.unex.giiis.asee.spanishweather.database.SpanishWeatherDatabase
@@ -15,13 +17,12 @@ import kotlinx.coroutines.launch
 class RegisterActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityRegisterBinding
-    private lateinit var db: SpanishWeatherDatabase
-    private lateinit var repository : RepositoryUsers
+    private val viewModel: RegisterViewModel by viewModels { RegisterViewModel.Factory }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityRegisterBinding.inflate(layoutInflater)
-        db = SpanishWeatherDatabase.getInstance(applicationContext)!!
-        repository = RepositoryUsers.getInstance(db.userDao())
+        val appContainer = (this.application as SpanishWeatherApplication).appContainer //todas las activities tienen una referencia a la app
+
         setContentView(binding.root)
         setUpListeners()
     }
@@ -57,7 +58,7 @@ class RegisterActivity : AppCompatActivity() {
     private fun registrarUsuario (usuario: Usuario){
         with(binding) {
             lifecycleScope.launch{
-                val error = repository.insertarUsuario(usuario)
+                viewModel.insertarUsuario(usuario)
                 navegarMainActivity(usuario)
             }
         }

@@ -7,11 +7,11 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
-import es.unex.giiis.asee.spanishweather.api.conexionAPI
-import es.unex.giiis.asee.spanishweather.database.clases.Location
-import es.unex.giiis.asee.spanishweather.database.RepositoryLocalidades
-import es.unex.giiis.asee.spanishweather.database.SpanishWeatherDatabase
+import es.unex.giiis.asee.spanishweather.activities.HomeViewModel
+import es.unex.giiis.asee.spanishweather.api.models.Localidad
 import es.unex.giiis.asee.spanishweather.database.clases.Usuario
 import es.unex.giiis.asee.spanishweather.databinding.FragmentFavouriteBinding
 import es.unex.giiis.asee.spanishweather.fragments.adapters.FavouriteAdapter
@@ -19,18 +19,13 @@ import es.unex.giiis.asee.spanishweather.utils.UserProvider
 
 
 class FavouriteFragment : Fragment() {
+    private val viewModel: FavouriteViewModel by viewModels { FavouriteViewModel.Factory }
+    private val homeViewModel: HomeViewModel by activityViewModels()
     private var _binding: FragmentFavouriteBinding? = null
     private lateinit var adapter: FavouriteAdapter
-    private lateinit var listener: OnLocationClickListener
-    private var pueblos: List<Location> = emptyList()
-    private lateinit var usuario: Usuario
+    private var pueblos: List<Localidad> = emptyList()
     private val binding get() = _binding!!
-    private lateinit var db: SpanishWeatherDatabase
-    private lateinit var repository : RepositoryLocalidades
 
-    interface OnLocationClickListener {
-        fun onLocationClick(pueblo: Location)
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -49,28 +44,17 @@ class FavouriteFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val userProvider = activity as UserProvider
-        usuario = userProvider.getUser()
         setUpRecyclerView()
+
+        homeViewModel.user.observe(viewLifecycleOwner) {
+                user -> viewModel.user = user
+        }
         subscribeUi(adapter)
-        repository.setUserName(usuario.userName)
     }
 
     private fun subscribeUi(adapter: FavouriteAdapter) {
-        repository.locationsInFavourite.observe(viewLifecycleOwner)
+        viewModel.locationsInFavourite.observe(viewLifecycleOwner)
         { user -> adapter.updateData(user.pueblos) } //user es el parámetro de la lambda, y recibe valor cuando se produce un cambio
-    }
-
-
-    override fun onAttach(context: android.content.Context) {
-        super.onAttach(context)
-        db = SpanishWeatherDatabase.getInstance(context)!!
-        repository = RepositoryLocalidades.getInstance(db.localidadDao(), conexionAPI())
-        if (context is OnLocationClickListener) {
-            listener = context
-        } else {
-            throw RuntimeException(context.toString() + " debe implementarse OnLocationClickListener")
-        }
     }
 
     override fun onDestroyView() {
@@ -81,7 +65,7 @@ class FavouriteFragment : Fragment() {
     private fun setUpRecyclerView() {
         adapter = FavouriteAdapter(values = pueblos, context = this.context, _binding=binding)
         adapter.setLocationClickListener {
-            listener.onLocationClick(it)
+            homeViewModel.onLocalidadClick(it)
         }
         with(binding) {
             val layoutManager = LinearLayoutManager(context)

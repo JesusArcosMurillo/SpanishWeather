@@ -1,33 +1,28 @@
 package es.unex.giiis.asee.spanishweather.activities
 
-import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import android.view.Menu
 import android.view.View
 import android.widget.Toast
-import androidx.fragment.app.FragmentTransaction
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
 import androidx.core.content.ContextCompat
-import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
-import com.google.firebase.firestore.auth.User
 import es.unex.giiis.asee.spanishweather.R
 import es.unex.giiis.asee.spanishweather.api.conexionAPI
 import es.unex.giiis.asee.spanishweather.api.models.Localidad
-import es.unex.giiis.asee.spanishweather.database.clases.Location
+import es.unex.giiis.asee.spanishweather.api.models.Location
 import es.unex.giiis.asee.spanishweather.database.clases.Usuario
 import es.unex.giiis.asee.spanishweather.databinding.ActivityHomeBinding
-import es.unex.giiis.asee.spanishweather.fragments.DetailFragment
 import es.unex.giiis.asee.spanishweather.fragments.FavouriteFragment
 import es.unex.giiis.asee.spanishweather.fragments.FavouriteFragmentDirections
 import es.unex.giiis.asee.spanishweather.fragments.ProvinciasFragment
@@ -39,12 +34,11 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 
-class HomeActivity : AppCompatActivity(), ProvinciasFragment.OnLocalidadClickListener,
-    FavouriteFragment.OnLocationClickListener, UserProvider {
+class HomeActivity : AppCompatActivity(){
 
+    private val viewModel: HomeViewModel by viewModels()
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityHomeBinding
-    private lateinit var usuario: Usuario
     private var isSearchButtonVisible = true
     private val navController by lazy {
         (supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as
@@ -65,62 +59,24 @@ class HomeActivity : AppCompatActivity(), ProvinciasFragment.OnLocalidadClickLis
 
     }
 
-    override fun getUser() = usuario
-
-    override fun onLocalidadClick(localidad: Localidad) {
+     fun onLocalidadClick(localidad: Localidad) {
+        //este método es para hacer click en la pantalla de discover
             val action =
                 ProvinciasFragmentDirections.actionProvinciasFragmentToDetailFragment(localidad)
             navController.navigate(action)
     }
 
-    override fun onLocationClick(pueblo: Location) {
-        //al hacer click en un pueblo, nos va a devolver simplemente el nombre del pueblo,
-        //no el objeto. No es conveniente guardar en una BD el tiempo de un día concreto porque
-        //el tiempo meteorológico es algo cambiante, no es como por ejemplo, una película, que
-        //está creada y es así para siempre. Por tanto, tiene más sentido almacenar en la BD
-        //cada una de las localidades que marquemos como favoritos.
-
-        //Por tanto, al hacer click obtenemos el nombre del pueblo y a continuación, habrá que llamar
-        //a la API para tener el objeto de la localidad y ver el detalle del tiempo
-
-        lifecycleScope.launch {
-            try {
-                val localidadEncontrada = fetchLocalidades(pueblo.name)
-                if (localidadEncontrada != null) {
-                    localidadEncontrada.location.is_favourite=pueblo.is_favourite
-                    withContext(Dispatchers.Main) {
-                        val action = FavouriteFragmentDirections.actionFavouriteFragmentToDetailFragment(localidadEncontrada)
-                        navController.navigate(action)
-                    }
-                } else {
-                    // Si no se encuentra el pueblo, mostrar un mensaje
-                    withContext(Dispatchers.Main) {
-                        Toast.makeText(
-                            this@HomeActivity,
-                            "Error, el pueblo introducido no se encuentra en la API",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    }
-                }
-            } catch (error: Throwable) {
-                // Si ocurre un error durante la llamada a la API
-                withContext(Dispatchers.Main) {
-                    Toast.makeText(
-                        this@HomeActivity,
-                        "Error al recuperar los datos de la API",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
-            }
-        }
-    }
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        usuario = intent.getSerializableExtra(USER_INFO) as Usuario
+        viewModel.userInSession = intent.getSerializableExtra(USER_INFO) as Usuario
         binding = ActivityHomeBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        viewModel.navigateToShow.observe(this) {
+                show -> show?.let {
+            onLocalidadClick(show)
+                }
+        }
         setUpUI()
     }
 
@@ -182,30 +138,12 @@ class HomeActivity : AppCompatActivity(), ProvinciasFragment.OnLocalidadClickLis
         searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String?): Boolean {
                 if (!query.isNullOrBlank()) {
-                    lifecycleScope.launch {
-                            val localidadEncontrada = fetchLocalidades(query)
-                            if (localidadEncontrada != null) {
-                                withContext(Dispatchers.Main) {
-
-                                    val action = ProvinciasFragmentDirections.actionProvinciasFragmentToDetailFragment(localidadEncontrada)
-                                    navController.navigate(action)
-
-                                }
-                            } else {
-                                // Si no se encuentra el pueblo, mostrar un mensaje
-                                withContext(Dispatchers.Main) {
-                                    Toast.makeText(
-                                        this@HomeActivity,
-                                        "Error, el pueblo introducido no se encuentra en la API",
-                                        Toast.LENGTH_SHORT
-                                    ).show()
-                                }
-                            }
+                    if(query.length!=0){
+                        viewModel.localidadBuscada = query
                     }
                 }
                 return true
             }
-
             override fun onQueryTextChange(newText: String?): Boolean {
                 // es necesario sobreescrbirlo pero no vamos a realizar ninguna operación
                 return true

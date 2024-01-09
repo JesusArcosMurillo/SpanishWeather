@@ -5,7 +5,7 @@ import androidx.recyclerview.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import es.unex.giiis.asee.spanishweather.database.clases.Location
+import es.unex.giiis.asee.spanishweather.api.models.Localidad
 import es.unex.giiis.asee.spanishweather.databinding.FavouriteItemListBinding
 import es.unex.giiis.asee.spanishweather.databinding.FragmentFavouriteBinding
 
@@ -15,14 +15,14 @@ import es.unex.giiis.asee.spanishweather.databinding.FragmentFavouriteBinding
 /* -------------------------------------------------------------------------------- */
 
 class FavouriteAdapter(
-    private var values: List<Location>,
+    private var values: List<Localidad>,
     private val context: Context?,
     private var _binding: FragmentFavouriteBinding,
         ) : RecyclerView.Adapter<FavouriteAdapter.ShowViewHolder>() {
 
-    private var onLocationClickListener: ((Location) -> Unit)? = null
+    private var onLocationClickListener: ((Localidad) -> Unit)? = null
     private var isTextViewVisible = true
-    fun setLocationClickListener(listener: (Location) -> Unit) {
+    fun setLocationClickListener(listener: (Localidad) -> Unit) {
         onLocationClickListener = listener
     }
 
@@ -41,15 +41,15 @@ class FavouriteAdapter(
     inner class ShowViewHolder(private val binding: FavouriteItemListBinding,
                                private val context: Context?)
         : RecyclerView.ViewHolder(binding.root) {
-        fun bind(pueblo: Location) {
+        fun bind(pueblo: Localidad) {
             with(binding) {
                 nombre.setOnClickListener {
                     onLocationClickListener?.let { click ->
                         click(pueblo)
                     }
                 }
-                nombre.text ="${pueblo.name}, "  //le asignamos el nombre del pueblo
-                region.text = pueblo.region
+                nombre.text ="${pueblo.location.name}, "  //le asignamos el nombre del pueblo
+                region.text = pueblo.location.region
             }
         }
     }
@@ -63,7 +63,7 @@ class FavouriteAdapter(
 
     }
 
-    fun updateData(values: List<Location>) {
+    fun updateData(values: List<Localidad>) {
         this.values = values
         notifyDataSetChanged()
         actualizarTexto()

@@ -40,3 +40,5 @@ interface SpanishWeatherAPI {
         @Query("days") diaspronostico: Int
     ): Localidad
 }
+
+class APIError(message: String, cause: Throwable?) : Throwable(message, cause)

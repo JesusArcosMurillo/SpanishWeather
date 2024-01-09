@@ -3,11 +3,9 @@ package es.unex.giiis.asee.spanishweather.api.models
 import androidx.room.Entity
 import java.io.Serializable
 
-@Entity
+
 data class Current(
-    val air_quality: AirQuality,
     val cloud: Int,
-    val condition: Condition,
     val feelslike_c: Double,
     val feelslike_f: Double,
     val gust_kph: Double,
