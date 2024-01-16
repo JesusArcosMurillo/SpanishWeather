@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/grafo_navegacion"
+    app:startDestination="@id/provinciasFragment">
+
+    <action
+        android:id="@+id/action_provinciasFragment_to_detailFragment"
+        app:destination="@id/detailFragment" />
+
+    <fragment
+        android:id="@+id/favouriteFragment"
+        android:name="es.unex.giiis.asee.spanishweather.fragments.FavouriteFragment"
+        android:label="Localidades favoritas"
+        tools:layout="@layout/fragment_favourite" >
+    </fragment>
+    <fragment
+        android:id="@+id/provinciasFragment"
+        android:name="es.unex.giiis.asee.spanishweather.fragments.ProvinciasFragment"
+        android:label="Descubrir"
+        tools:layout="@layout/recycler_vertical" >
+    </fragment>
+    <fragment
+        android:id="@+id/detailFragment"
+        android:name="es.unex.giiis.asee.spanishweather.fragments.DetailFragment"
+        android:label="Detail"
+        tools:layout="@layout/fragment_detail">
+        <argument
+            android:name="localidad"
+            app:argType="es.unex.giiis.asee.spanishweather.api.models.Localidad"/>
+    </fragment>
+</navigation>

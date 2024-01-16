@@ -1,5 +1,25 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme. -->
+    <style name="Base.Theme.SpanishWeather" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- Customize your dark theme here. -->
+        <!-- <item name="colorPrimary">@color/my_dark_primary</item> -->
+    </style>
 
-    <style name="Theme.SpanishWeather" parent="android:Theme.Material.Light.NoActionBar" />
+    <style name="Theme.SpanishWeather" parent="Base.Theme.SpanishWeather">
+    </style>
+
+    <style name="Toolbar" parent="ThemeOverlay.AppCompat.ActionBar">
+        <item name="android:textColorSecondary">
+            @android:color/white</item>
+        <item name="android:fontFamily">
+            @font/bebas_neue
+        </item>
+        <item
+            name="android:background">@color/tono
+        </item>
+        //fuente
+        <item name="android:textColorPrimary">
+            @android:color/white</item>
+        //color de fondo
+    </style>
 </resources>

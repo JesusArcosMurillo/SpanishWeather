@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#273039"
+    tools:context=".activities.LoginActivity">
+
+
+    <TextView
+        android:id="@+id/tv_titulo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="60dp"
+        android:fontFamily="@font/bebas_neue"
+        android:text="The Spanish"
+        android:textColor="#FF4444"
+        android:textSize="60sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.497"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/tv_titulo2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:fontFamily="@font/bebas_neue"
+        android:text="Weather"
+        android:textColor="#FF4444"
+        android:textSize="55sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="@+id/imageView"
+        app:layout_constraintHorizontal_bias="0.492"
+        app:layout_constraintStart_toStartOf="@+id/imageView"
+        app:layout_constraintTop_toBottomOf="@+id/imageView" />
+
+    <EditText
+        android:id="@+id/et_usuario"
+        android:layout_width="325dp"
+        android:layout_height="41dp"
+        android:layout_marginTop="32dp"
+        android:backgroundTint="#FF4444"
+        android:ems="10"
+        android:fontFamily="@font/open_sans"
+        android:hint="Usuario"
+        android:textAlignment="textStart"
+        android:textColor="#CECECF"
+        android:textColorHint="#CECECF"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tv_titulo2" />
+
+    <EditText
+        android:id="@+id/et_contrasena"
+        android:layout_width="325dp"
+        android:layout_height="41dp"
+        android:layout_marginTop="32dp"
+        android:backgroundTint="#FF4444"
+        android:ems="10"
+        android:fontFamily="@font/open_sans"
+        android:hint="Contraseña"
+        android:textAlignment="textStart"
+        android:textColor="#CECECF"
+        android:textColorHint="#CECECF"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="@+id/et_usuario"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="@+id/et_usuario"
+        app:layout_constraintTop_toBottomOf="@+id/et_usuario"
+        tools:ignore="MissingConstraints" />
+
+    <ImageView
+        android:id="@+id/imageView"
+        android:layout_width="90dp"
+        android:layout_height="72dp"
+        android:layout_marginTop="20dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.498"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tv_titulo"
+        app:srcCompat="@drawable/esp2" />
+
+    <Button
+        android:id="@+id/bt_sign"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="92dp"
+        android:backgroundTint="#FF4444"
+        android:fontFamily="@font/open_sans_extrabold"
+        android:radius="16dp"
+        android:text="Iniciar sesión"
+        android:textColor="#273039"
+        app:cornerRadius="10dp"
+        app:layout_constraintEnd_toEndOf="@+id/et_contrasena"
+        app:layout_constraintStart_toStartOf="@+id/et_contrasena"
+        app:layout_constraintTop_toBottomOf="@+id/et_contrasena" />
+
+    <TextView
+        android:id="@+id/et_registro"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="52dp"
+        android:fontFamily="@font/open_sans_extrabold"
+        android:text="¿Aún no tienes cuenta? ¡Registrate!"
+        android:textColor="#FFFFFF"
+        app:layout_constraintEnd_toEndOf="@+id/bt_sign"
+        app:layout_constraintHorizontal_bias="0.513"
+        app:layout_constraintStart_toStartOf="@+id/bt_sign"
+        app:layout_constraintTop_toBottomOf="@+id/bt_sign" />
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>
